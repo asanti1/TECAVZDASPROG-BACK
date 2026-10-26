@@ -1,0 +1,10 @@
+.env
+node_modules/
+dist/
+__pycache__/
+.venv/
+.pytest_cache/
+*.log
+.DS_Store
+*.tsbuildinfo
+docker-compose.example.yml
