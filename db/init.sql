@@ -82,12 +82,14 @@ CREATE TABLE order_items (
 CREATE TABLE routes (
     id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     trip_id             UUID             NOT NULL REFERENCES trips (id) ON DELETE CASCADE,
+    order_id            UUID             NOT NULL REFERENCES orders (id),
     sequence_order      INTEGER          NOT NULL CHECK (sequence_order >= 1),
     geometry            JSONB            NOT NULL,
     distance_km         DOUBLE PRECISION NOT NULL CHECK (distance_km >= 0),
     estimated_time_min  INTEGER          NOT NULL CHECK (estimated_time_min >= 0),
     algorithm_used      TEXT             NOT NULL,
-    UNIQUE (trip_id, sequence_order)
+    UNIQUE (trip_id, sequence_order),
+    UNIQUE (trip_id, order_id)
 );
 
 CREATE INDEX idx_orders_status_origin ON orders (status, origin_branch_id);
