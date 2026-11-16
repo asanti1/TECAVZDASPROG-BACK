@@ -33,6 +33,7 @@
         <form id="order-form">
           <label data-roles="ADMIN" hidden>Cliente <select id="customer"></select></label>
           <label>Producto <select id="product" required></select></label>
+          <p id="product-stock" class="hint"></p>
           <label>Cantidad <input id="quantity" type="number" min="1" value="1" required /></label>
           <p id="address-hint" class="hint">Hacé click en el mapa para marcar la dirección de entrega.</p>
           <button type="submit">Crear pedido</button>

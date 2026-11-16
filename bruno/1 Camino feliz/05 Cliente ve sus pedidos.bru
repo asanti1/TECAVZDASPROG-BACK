@@ -1,0 +1,24 @@
+meta {
+  name: 05 Cliente ve sus pedidos
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/orders
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{customerToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.length: gte 2
+}
+
+docs {
+  El listado se filtra por el cliente del token: nunca ve pedidos ajenos.
+}

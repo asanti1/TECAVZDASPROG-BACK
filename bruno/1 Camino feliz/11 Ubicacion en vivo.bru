@@ -1,0 +1,25 @@
+meta {
+  name: 11 Ubicacion en vivo
+  type: http
+  seq: 11
+}
+
+get {
+  url: {{baseUrl}}/trips/{{tripId}}/location
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+assert {
+  res.status: eq 200
+}
+
+docs {
+  Ultima posicion del repartidor. Para moverlo, en otra terminal:
+  cd backend && node scripts/simulate-driver.mjs <tripId>
+  El tripId esta en la variable tripId. En el frontend se ve el punto moverse por WebSocket.
+}

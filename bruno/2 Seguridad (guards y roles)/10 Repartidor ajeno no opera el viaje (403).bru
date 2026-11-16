@@ -1,0 +1,23 @@
+meta {
+  name: 10 Repartidor ajeno no opera el viaje (403)
+  type: http
+  seq: 10
+}
+
+post {
+  url: {{baseUrl}}/trips/{{tripId}}/start
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{otherDriverToken}}
+}
+
+assert {
+  res.status: eq 403
+}
+
+docs {
+  Cada repartidor solo opera sus viajes: la pertenencia se valida con una funcion pura (canAccessTrip).
+}

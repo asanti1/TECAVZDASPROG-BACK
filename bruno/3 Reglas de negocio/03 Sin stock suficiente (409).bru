@@ -1,0 +1,31 @@
+meta {
+  name: 03 Sin stock suficiente (409)
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/orders
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{customerToken}}
+}
+
+body:json {
+  {
+    "type": "CUSTOMER",
+    "deliveryAddress": { "latitude": -38.714, "longitude": -62.265 },
+    "items": [{ "productId": "{{productId}}", "quantity": 999999 }]
+  }
+}
+
+assert {
+  res.status: eq 409
+}
+
+docs {
+  Ninguna sucursal cubre el pedido completo. No hay entregas parciales.
+}

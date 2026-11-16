@@ -1,3 +1,7 @@
+"""Prueba de punta a punta contra el sistema levantado (backend + RabbitMQ + servicio de rutas).
+
+Usa los datos de db/seed.sql. Uso:  python3 scripts/smoke.py [http://localhost:3000]
+"""
 import json
 import sys
 import time
@@ -8,9 +12,9 @@ BASE = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:3000"
 PASSWORD = "demo1234"
 YERBA = "a0000000-0000-4000-8000-000000000001"
 ADDRESSES = [
-    (-38.7140, -62.2650),
-    (-38.7230, -62.2590),
-    (-38.7090, -62.2700),
+    (-38.7030, -62.2850),
+    (-38.7080, -62.2780),
+    (-38.7120, -62.2920),
 ]
 WAIT_SECONDS = 120
 
@@ -46,6 +50,7 @@ def main() -> None:
     ]
     print(f"Pedidos creados: {[o['id'][:8] for o in orders]} (salen de {orders[0]['originBranchId'][:8]})")
 
+    # Armar viajes es del administrador; el cliente solo hizo sus pedidos.
     trip = call("POST", "/trips", {
         "orderIds": [o["id"] for o in orders],
     }, admin)

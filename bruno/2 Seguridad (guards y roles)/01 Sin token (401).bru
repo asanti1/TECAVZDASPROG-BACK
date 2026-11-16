@@ -1,0 +1,19 @@
+meta {
+  name: 01 Sin token (401)
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/orders
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 401
+}
+
+docs {
+  Un guard global exige token en todas las rutas salvo el login.
+}

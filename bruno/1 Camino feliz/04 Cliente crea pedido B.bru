@@ -1,0 +1,31 @@
+meta {
+  name: 04 Cliente crea pedido B
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/orders
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{customerToken}}
+}
+
+body:json {
+  {
+    "type": "CUSTOMER",
+    "deliveryAddress": { "latitude": -38.707, "longitude": -62.280 },
+    "items": [{ "productId": "{{productId}}", "quantity": 1 }]
+  }
+}
+
+assert {
+  res.status: eq 201
+}
+
+script:post-response {
+bru.setVar("orderB", res.body.id);
+}

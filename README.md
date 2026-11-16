@@ -66,7 +66,7 @@ Reglas de dependencia entre funcionalidades: `branches` no conoce a `orders` ni 
 | **Strategy** | Elección de sucursal (`IBranchSelectionStrategy`), asignación de repartidor (`IDeliveryAssignmentStrategy`) y algoritmo de camino mínimo (`PathFinder`: Dijkstra o A\*) |
 | **Repository** | `IOrderRepository`, `ITripRepository`, `IBranchRepository`, ... con implementación Postgres |
 | **Unit of Work** | `IUnitOfWork` / `PostgresUnitOfWork`: transacciones que se anidan y se propagan solas |
-| **Adapter** | `AmqpRouteOptimizer` traduce `IRouteOptimizer` a mensajes de RabbitMQ; `OsmnxMapSource` traduce OSMnx a nuestro grafo |
+| **Adapter** | `AmqpRouteOptimizer` traduce `IRouteOptimizer` a mensajes de RabbitMQ; `OsmnxGraphProvider` traduce OSMnx a nuestro grafo |
 | **Máquina de estados** | `Order` (pending → assigned → in_trip → delivered) y `Trip` (planned → in_progress → completed) |
 | **Idempotencia** | Un resultado de rutas repetido se ignora (backend) y un pedido repetido no se recalcula (servicio) |
 | **SOLID** | Una responsabilidad por clase; el dominio depende de abstracciones, nunca de detalles |
@@ -156,6 +156,8 @@ python3 scripts/smoke.py
 
 En el frontend, entrar con `admin@demo.local` / `demo1234` (ve todo), `cliente@demo.local` (solo crea pedidos y ve los suyos) o `repartidor1@demo.local` (solo sus viajes).
 
+Los datos de ejemplo traen cuatro sucursales en las esquinas de un cuadrado en Bahía Blanca, ocho productos y un stock desparejo a propósito (la leche solo está en el sur, el azúcar solo en dos sucursales, la harina del Noroeste casi se agota), para ver cuál sucursal gana en cada pedido.
+
 Si cambia `db/init.sql`, `db/seed.sql` o `rabbitmq/definitions.json`, hay que recrear los volúmenes:
 `docker compose down -v && docker compose up -d --build`.
 
@@ -199,7 +201,7 @@ El servicio de rutas no descarga el mapa en cada viaje: baja **una zona fija** (
 | `DELIVERY_PERSON` | Ver, iniciar, completar y reportar la posición de **sus** viajes |
 | `ADMIN` | Todo lo anterior sobre cualquier cliente o viaje, más armar viajes y consultar usuarios |
 
-Usuarios de prueba (clave `demo1234`): `admin@demo.local`, `cliente@demo.local`, `repartidor1@demo.local` … `repartidor4@demo.local`. La clave de firma sale de `JWT_SECRET`.
+Usuarios de prueba (clave `demo1234`): `admin@demo.local`, `cliente@demo.local`, `repartidor1@demo.local` … `repartidor8@demo.local` (dos por sucursal). La clave de firma sale de `JWT_SECRET`.
 
 La autorización es un guard global (`JwtAuthGuard` + `RolesGuard`) con los decoradores `@Public()` y `@Roles()`; la pertenencia (¿este viaje es de este repartidor?) la deciden funciones puras en cada feature (`trip-access.ts`, `order-access.ts`).
 

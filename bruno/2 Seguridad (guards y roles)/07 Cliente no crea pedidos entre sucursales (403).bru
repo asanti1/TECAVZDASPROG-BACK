@@ -1,0 +1,31 @@
+meta {
+  name: 07 Cliente no crea pedidos entre sucursales (403)
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/orders
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{customerToken}}
+}
+
+body:json {
+  {
+    "type": "INTER_BRANCH",
+    "destinationBranchId": "{{branchId}}",
+    "items": [{ "productId": "{{productId}}", "quantity": 1 }]
+  }
+}
+
+assert {
+  res.status: eq 403
+}
+
+docs {
+  Un cliente solo crea pedidos de cliente.
+}

@@ -1,0 +1,27 @@
+meta {
+  name: 01 Pedido invalido (400)
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/orders
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{customerToken}}
+}
+
+body:json {
+  {}
+}
+
+assert {
+  res.status: eq 400
+}
+
+docs {
+  La validacion del cuerpo la hacen los DTO.
+}

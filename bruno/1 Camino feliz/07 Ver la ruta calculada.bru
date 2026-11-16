@@ -1,0 +1,28 @@
+meta {
+  name: 07 Ver la ruta calculada
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/trips/{{tripId}}/route
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.routesReady: eq true
+}
+
+script:pre-request {
+await bru.sleep(4000);
+}
+
+docs {
+  El servicio de Python calculo cada tramo con Dijkstra sobre el mapa de OpenStreetMap y devolvio la geometria por RabbitMQ. Si routesReady es false, todavia esta calculando: volver a ejecutar.
+}

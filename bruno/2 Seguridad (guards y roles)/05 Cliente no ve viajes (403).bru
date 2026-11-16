@@ -1,0 +1,19 @@
+meta {
+  name: 05 Cliente no ve viajes (403)
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/trips
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{customerToken}}
+}
+
+assert {
+  res.status: eq 403
+}

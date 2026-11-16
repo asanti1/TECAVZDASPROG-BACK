@@ -1,0 +1,23 @@
+meta {
+  name: 01 Stock de todas las sucursales
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/products
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+assert {
+  res.status: eq 200
+}
+
+docs {
+  Cada producto con su stock por sucursal. La leche solo esta en el sur, el azucar solo en Noreste y Sureste.
+}

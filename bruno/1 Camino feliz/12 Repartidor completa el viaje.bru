@@ -1,0 +1,24 @@
+meta {
+  name: 12 Repartidor completa el viaje
+  type: http
+  seq: 12
+}
+
+post {
+  url: {{baseUrl}}/trips/{{tripId}}/complete
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{driverToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq completed
+}
+
+docs {
+  El viaje queda completed y sus pedidos delivered.
+}

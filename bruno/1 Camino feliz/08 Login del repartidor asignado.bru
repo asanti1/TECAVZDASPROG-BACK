@@ -1,0 +1,32 @@
+meta {
+  name: 08 Login del repartidor asignado
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{baseUrl}}/auth/login
+  body: json
+  auth: none
+}
+
+body:json {
+  { "email": "{{driverEmail}}", "password": "demo1234" }
+}
+
+assert {
+  res.status: eq 200
+}
+
+script:pre-request {
+const n = bru.getVar("deliveryPersonId").slice(-1);
+bru.setVar("driverEmail", `repartidor${n}@demo.local`);
+}
+
+script:post-response {
+bru.setVar("driverToken", res.body.accessToken);
+}
+
+docs {
+  Entra como el repartidor que el sistema asigno al viaje.
+}

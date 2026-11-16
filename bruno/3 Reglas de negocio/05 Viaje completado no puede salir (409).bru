@@ -1,0 +1,23 @@
+meta {
+  name: 05 Viaje completado no puede salir (409)
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/trips/{{tripId}}/start
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+assert {
+  res.status: eq 409
+}
+
+docs {
+  La maquina de estados del viaje no permite volver atras.
+}

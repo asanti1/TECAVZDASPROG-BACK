@@ -1,0 +1,24 @@
+meta {
+  name: 09 Repartidor ve sus viajes
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{baseUrl}}/trips
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{driverToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.length: gte 1
+}
+
+docs {
+  Cada repartidor ve solo su propio viaje.
+}

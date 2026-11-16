@@ -1,0 +1,24 @@
+meta {
+  name: 10 Repartidor sale
+  type: http
+  seq: 10
+}
+
+post {
+  url: {{baseUrl}}/trips/{{tripId}}/start
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{driverToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq in_progress
+}
+
+docs {
+  El viaje pasa a in_progress y sus pedidos a in_trip (maquina de estados).
+}

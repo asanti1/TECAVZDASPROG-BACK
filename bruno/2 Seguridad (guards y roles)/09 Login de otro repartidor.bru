@@ -1,0 +1,27 @@
+meta {
+  name: 09 Login de otro repartidor
+  type: http
+  seq: 9
+}
+
+post {
+  url: {{baseUrl}}/auth/login
+  body: json
+  auth: none
+}
+
+body:json {
+  { "email": "repartidor2@demo.local", "password": "demo1234" }
+}
+
+assert {
+  res.status: eq 200
+}
+
+script:post-response {
+bru.setVar("otherDriverToken", res.body.accessToken);
+}
+
+docs {
+  Repartidor de otra sucursal. Se usa en la request siguiente.
+}

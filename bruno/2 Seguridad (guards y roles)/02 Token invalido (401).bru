@@ -1,0 +1,23 @@
+meta {
+  name: 02 Token invalido (401)
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/orders
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 401
+}
+
+script:pre-request {
+req.setHeader("Authorization", "Bearer token.inventado.falso");
+}
+
+docs {
+  Un JWT que no se puede verificar tambien da 401.
+}

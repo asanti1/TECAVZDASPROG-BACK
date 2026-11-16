@@ -1,0 +1,23 @@
+meta {
+  name: 03 Clave incorrecta (401)
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/auth/login
+  body: json
+  auth: none
+}
+
+body:json {
+  { "email": "admin@demo.local", "password": "incorrecta" }
+}
+
+assert {
+  res.status: eq 401
+}
+
+docs {
+  El mensaje no revela si fallo el email o la clave.
+}

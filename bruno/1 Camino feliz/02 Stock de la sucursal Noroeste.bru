@@ -1,0 +1,23 @@
+meta {
+  name: 02 Stock de la sucursal Noroeste
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/branches/{{branchId}}/products
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+assert {
+  res.status: eq 200
+}
+
+docs {
+  Stock por producto. Se descuenta cuando se crea un pedido.
+}

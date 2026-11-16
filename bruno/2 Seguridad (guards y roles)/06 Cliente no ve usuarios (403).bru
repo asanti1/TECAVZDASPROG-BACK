@@ -1,0 +1,19 @@
+meta {
+  name: 06 Cliente no ve usuarios (403)
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/users
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{customerToken}}
+}
+
+assert {
+  res.status: eq 403
+}

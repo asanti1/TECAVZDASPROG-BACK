@@ -1,0 +1,35 @@
+meta {
+  name: 05 Leche y azucar juntos: no hay entregas parciales
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/orders
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{customerToken}}
+}
+
+body:json {
+  {
+    "type": "CUSTOMER",
+    "deliveryAddress": { "latitude": -38.702, "longitude": -62.285 },
+    "items": [
+      { "productId": "a0000000-0000-4000-8000-000000000007", "quantity": 1 },
+      { "productId": "a0000000-0000-4000-8000-000000000005", "quantity": 1 }
+    ]
+  }
+}
+
+assert {
+  res.status: eq 201
+  res.body.originBranchId: eq b0000000-0000-4000-8000-000000000004
+}
+
+docs {
+  Solo Sureste tiene los dos productos, asi que despacha todo desde ahi aunque sea la mas lejana. El pedido se cumple completo desde una sola sucursal.
+}

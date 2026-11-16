@@ -1,0 +1,33 @@
+meta {
+  name: 06 Harina x2: agota el stock del Noroeste
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/orders
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{customerToken}}
+}
+
+body:json {
+  {
+    "type": "CUSTOMER",
+    "deliveryAddress": { "latitude": -38.702, "longitude": -62.285 },
+    "items": [
+      { "productId": "a0000000-0000-4000-8000-000000000006", "quantity": 2 }
+    ]
+  }
+}
+
+assert {
+  res.status: eq 201
+}
+
+docs {
+  En una base recien creada el Noroeste tiene solo 2 harinas y este pedido se las lleva todas.
+}

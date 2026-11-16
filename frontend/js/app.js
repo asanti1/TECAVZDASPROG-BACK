@@ -50,12 +50,26 @@ function fillSelect(select, items, label) {
   select.innerHTML = items.map((item) => `<option value="${escapeHtml(item.id)}">${escapeHtml(label(item))}</option>`).join('');
 }
 
+// "Noroeste 30 · Noreste 10": quién tiene stock de un producto, en el orden de las sucursales.
+function stockByBranch(product) {
+  const parts = state.branches
+    .map((branch) => ({ name: branch.name.replace('Sucursal ', ''), level: product.stock.find((s) => s.branchId === branch.id) }))
+    .filter(({ level }) => level && level.quantity > 0)
+    .map(({ name, level }) => `${name} ${level.quantity}`);
+  return parts.length > 0 ? parts.join(' · ') : 'sin stock';
+}
+
+function renderProductStock() {
+  const product = state.products.find((p) => p.id === $('product').value);
+  $('product-stock').textContent = product ? `Stock: ${stockByBranch(product)}` : '';
+}
+
 function renderCatalog() {
+  const selectedProduct = $('product').value;
   fillSelect($('customer'), state.customers, (c) => c.name);
-  fillSelect($('product'), state.products, (p) => {
-    const total = p.stock.reduce((sum, level) => sum + level.quantity, 0);
-    return `${p.name} (stock total: ${total})`;
-  });
+  fillSelect($('product'), state.products, (p) => `${p.name} (${stockByBranch(p)})`);
+  if (state.products.some((p) => p.id === selectedProduct)) $('product').value = selectedProduct;
+  renderProductStock();
   map.showBranches(state.branches);
 }
 
@@ -175,6 +189,8 @@ function redrawSelectedTripIfChanged() {
     map.showTrip(trip);
   }
 }
+
+$('product').addEventListener('change', renderProductStock);
 
 $('order-form').addEventListener('submit', (event) => {
   event.preventDefault();

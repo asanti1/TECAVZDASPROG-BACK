@@ -1,0 +1,33 @@
+meta {
+  name: 07 Harina otra vez: ahora gana otra sucursal
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/orders
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{customerToken}}
+}
+
+body:json {
+  {
+    "type": "CUSTOMER",
+    "deliveryAddress": { "latitude": -38.702, "longitude": -62.285 },
+    "items": [
+      { "productId": "a0000000-0000-4000-8000-000000000006", "quantity": 1 }
+    ]
+  }
+}
+
+assert {
+  res.status: eq 201
+}
+
+docs {
+  El Noroeste ya no tiene stock, asi que el mismo pedido sale desde la siguiente mas cercana (Noreste). El stock se descuenta de forma atomica en la base.
+}

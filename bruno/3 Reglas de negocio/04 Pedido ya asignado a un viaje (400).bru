@@ -1,0 +1,27 @@
+meta {
+  name: 04 Pedido ya asignado a un viaje (400)
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/trips
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  { "orderIds": ["{{orderA}}"] }
+}
+
+assert {
+  res.status: eq 400
+}
+
+docs {
+  Un pedido solo se puede asignar una vez: la transicion de estado lo impide.
+}
