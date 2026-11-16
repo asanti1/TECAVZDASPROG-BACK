@@ -14,7 +14,7 @@ SECONDS_PER_DAY = 86_400
 
 
 class OutOfCoverageError(ValueError):
-
+    pass
 
 class MapSource(Protocol):
     def download(self, bbox: BBox): ...

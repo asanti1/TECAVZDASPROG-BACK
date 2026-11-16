@@ -6,8 +6,7 @@ _EPSILON = 1e-9
 
 
 class StopOrderer(Protocol):
-    def order(self, stop_count: int, distance: Distance) -> list[int]:
-
+    def order(self, stop_count: int, distance: Distance) -> list[int]: ...
 
 
 def route_cost(order: list[int], distance: Distance) -> float:
