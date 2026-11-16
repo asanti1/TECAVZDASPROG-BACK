@@ -1,0 +1,27 @@
+meta {
+  name: Cliente
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/auth/login
+  body: json
+  auth: none
+}
+
+body:json {
+  { "email": "cliente@demo.local", "password": "demo1234" }
+}
+
+assert {
+  res.status: eq 200
+}
+
+script:post-response {
+bru.setVar("customerToken", res.body.accessToken);
+}
+
+docs {
+  Guarda el token en la variable customerToken. Ejecutar antes que el resto de las carpetas.
+}

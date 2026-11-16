@@ -6,7 +6,7 @@ import type { IBranchRepository } from '../../branches/domain/branch.repository.
 import { BRANCH_REPOSITORY } from '../../branches/domain/branch.repository.js';
 import type { IStockRepository } from '../../branches/domain/stock.repository.js';
 import { STOCK_REPOSITORY } from '../../branches/domain/stock.repository.js';
-import { BranchNotFoundError } from '../../shared/errors.js';
+import { BranchNotFoundError, OrderNotFoundError } from '../../shared/errors.js';
 import type { Coordinates } from '../../shared/geo/coordinates.js';
 import type { IIdGenerator } from '../../shared/id-generator.js';
 import { ID_GENERATOR } from '../../shared/id-generator.js';
@@ -15,7 +15,7 @@ import { UNIT_OF_WORK } from '../../shared/unit-of-work.js';
 import { OrderType } from '../domain/order-status.js';
 import type { DeliveryAddress } from '../domain/order.js';
 import { Order } from '../domain/order.js';
-import type { IOrderRepository } from '../domain/order.repository.js';
+import type { IOrderRepository, OrderFilter } from '../domain/order.repository.js';
 import { ORDER_REPOSITORY } from '../domain/order.repository.js';
 
 export interface CreateCustomerOrderInput {
@@ -50,11 +50,24 @@ export class OrdersService {
     const candidates = await this.findCandidates(input);
     const originBranch = this.branchSelection.selectBranch({ items: input.items, destination: destination.location }, candidates);
     const order = this.buildOrder(input, originBranch);
+
     await this.unitOfWork.runInTransaction(async () => {
       await this.stock.reserve(originBranch.id, order.items);
       await this.orders.save(order);
     });
 
+    return order;
+  }
+
+  findAll(filter: OrderFilter = {}): Promise<Order[]> {
+    return this.orders.findAll(filter);
+  }
+
+  async findById(id: string): Promise<Order> {
+    const order = await this.orders.findById(id);
+    if (!order) {
+      throw new OrderNotFoundError(`No existe el pedido ${id}`);
+    }
     return order;
   }
 
@@ -69,12 +82,13 @@ export class OrdersService {
     return { location: branch.location, branchId: branch.id };
   }
 
-  private async findCandidates(input: CreateOrderInput): Promise<BranchCandidate[]> {
-    const candidates = await this.branches.findCandidatesWithStock(
-      input.items.map((item) => item.productId),
-    );
+  private async findCandidates(input: CreateOrderInput,): Promise<BranchCandidate[]> {
+    const candidates = await this.branches.findCandidatesWithStock(input.items.map((item) => item.productId));
+
     if (input.type === OrderType.INTER_BRANCH) {
-      return candidates.filter(({ branch }) => branch.id !== input.destinationBranchId);
+      return candidates.filter(
+        ({ branch }) => branch.id !== input.destinationBranchId,
+      );
     }
     return candidates;
   }

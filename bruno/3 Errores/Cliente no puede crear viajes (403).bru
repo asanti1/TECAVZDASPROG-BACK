@@ -1,0 +1,27 @@
+meta {
+  name: Cliente no puede crear viajes (403)
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/trips
+  body: json
+  auth: bearer
+}
+
+body:json {
+  { "orderIds": ["00000000-0000-4000-8000-000000000000"] }
+}
+
+auth:bearer {
+  token: {{customerToken}}
+}
+
+assert {
+  res.status: eq 403
+}
+
+docs {
+  Requiere haber ejecutado antes "0 Login / Cliente". Armar viajes es solo del administrador.
+}

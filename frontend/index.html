@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Logística y Rutas de Entrega</title>
+    <link rel="stylesheet" href="vendor/leaflet/leaflet.css" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <aside class="sidebar">
+      <header>
+        <h1>Logística y Rutas</h1>
+        <p id="status" class="status" role="status"></p>
+        <p id="user-bar" class="user-bar" hidden>
+          <span id="user-name"></span>
+          <button id="logout" class="secondary" type="button">Salir</button>
+        </p>
+      </header>
+
+      <section id="login-panel" class="panel" aria-labelledby="login-title" hidden>
+        <h2 id="login-title">Iniciar sesión</h2>
+        <form id="login-form">
+          <label>Email <input id="login-email" type="text" autocomplete="username" required /></label>
+          <label>Contraseña <input id="login-password" type="password" autocomplete="current-password" required /></label>
+          <button type="submit">Entrar</button>
+        </form>
+        <p class="hint">Usuarios de prueba (clave <code>demo1234</code>): <code>admin@demo.local</code>, <code>cliente@demo.local</code>, <code>repartidor1@demo.local</code>.</p>
+      </section>
+
+      <section class="panel" data-roles="ADMIN CUSTOMER" aria-labelledby="new-order-title" hidden>
+        <h2 id="new-order-title">Nuevo pedido</h2>
+        <form id="order-form">
+          <label data-roles="ADMIN" hidden>Cliente <select id="customer"></select></label>
+          <label>Producto <select id="product" required></select></label>
+          <label>Cantidad <input id="quantity" type="number" min="1" value="1" required /></label>
+          <p id="address-hint" class="hint">Hacé click en el mapa para marcar la dirección de entrega.</p>
+          <button type="submit">Crear pedido</button>
+        </form>
+      </section>
+
+      <section class="panel" data-roles="ADMIN" aria-labelledby="pending-title" hidden>
+        <h2 id="pending-title">Pedidos pendientes</h2>
+        <ul id="pending-orders" class="list"></ul>
+        <button id="create-trip" type="button" disabled>Crear viaje con los seleccionados</button>
+      </section>
+
+      <section class="panel" data-roles="CUSTOMER" aria-labelledby="my-orders-title" hidden>
+        <h2 id="my-orders-title">Mis pedidos</h2>
+        <ul id="my-orders" class="list"></ul>
+      </section>
+
+      <section class="panel" data-roles="ADMIN DELIVERY_PERSON" aria-labelledby="trips-title" hidden>
+        <h2 id="trips-title">Viajes</h2>
+        <ul id="trips" class="list"></ul>
+      </section>
+    </aside>
+
+    <main id="map" aria-label="Mapa"></main>
+
+    <script src="vendor/leaflet/leaflet.js"></script>
+    <script src="config.js"></script>
+    <script type="module" src="js/app.js"></script>
+  </body>
+</html>

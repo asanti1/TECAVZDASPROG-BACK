@@ -1,0 +1,20 @@
+meta {
+  name: 7 Completar viaje
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/trips/{{tripId}}/complete
+  body: none
+  auth: bearer
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq completed
+}
+
+auth:bearer {
+  token: {{token}}
+}

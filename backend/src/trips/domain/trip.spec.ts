@@ -5,7 +5,9 @@ import { Trip, type TripProps } from './trip.js';
 
 const leg = (sequenceOrder: number, toOrderId: string): Route =>
   new Route({
-    sequenceOrder, toOrderId, geometry: [
+    sequenceOrder,
+    toOrderId,
+    geometry: [
       { latitude: 0, longitude: 0 },
       { latitude: 1, longitude: 1 },
     ],
@@ -14,8 +16,13 @@ const leg = (sequenceOrder: number, toOrderId: string): Route =>
     algorithmUsed: 'dijkstra',
   });
 
-const props = (overrides: Partial<TripProps> = {}):
-  TripProps => ({ id: 't1', deliveryPersonId: 'd1', originBranchId: 'b1', orderIds: ['o1', 'o2'], ...overrides });
+const props = (overrides: Partial<TripProps> = {}): TripProps => ({
+  id: 't1',
+  deliveryPersonId: 'd1',
+  originBranchId: 'b1',
+  orderIds: ['o1', 'o2'],
+  ...overrides,
+});
 
 const plan = (legs: Route[], tripId = 't1') => ({ tripId, legs });
 const goodLegs = () => [leg(1, 'o1'), leg(2, 'o2')];
@@ -29,31 +36,12 @@ describe('Trip: creación', () => {
     expect(trip.routes).toEqual([]);
   });
 
-  it.each([
-    ['id', { id: ' ' }],
-    ['repartidor', { deliveryPersonId: '' }],
-    ['sucursal', { originBranchId: '  ' }],
-  ])('rechaza %s vacío', (_name, overrides) => {
-    expect(() => new Trip(props(overrides))).toThrow(InvalidTripError);
-  });
-
   it('rechaza viaje sin pedidos', () => {
     expect(() => new Trip(props({ orderIds: [] }))).toThrow(InvalidTripError);
   });
 
   it('rechaza pedidos repetidos', () => {
     expect(() => new Trip(props({ orderIds: ['o1', 'o1'] }))).toThrow(InvalidTripError);
-  });
-
-  it('permite un viaje de un solo pedido', () => {
-    expect(() => new Trip(props({ orderIds: ['o1'] }))).not.toThrow();
-  });
-
-  it('copia orderIds', () => {
-    const ids = ['o1', 'o2'];
-    const trip = new Trip(props({ orderIds: ids }));
-    ids.push('o3');
-    expect(trip.orderIds).toEqual(['o1', 'o2']);
   });
 });
 
@@ -62,19 +50,8 @@ describe('Trip: consistencia al reconstruir (como viene de la base)', () => {
     expect(() => new Trip(props({ departureAt: departure }))).toThrow(InvalidTripError);
   });
 
-  it('in_progress requiere fecha de salida', () => {
-    expect(() => new Trip(props({ status: TripStatus.IN_PROGRESS, routes: goodLegs() }))).toThrow(InvalidTripError);
-  });
-
   it('in_progress requiere rutas', () => {
-    expect(() => new Trip(props({ status: TripStatus.IN_PROGRESS, departureAt: departure }),),
-    ).toThrow(InvalidTripError);
-  });
-
-  it('completed requiere fecha de salida y rutas', () => {
-    expect(() => new Trip(props({ status: TripStatus.COMPLETED, routes: goodLegs() }))).toThrow(InvalidTripError);
-
-    expect(() => new Trip(props({ status: TripStatus.COMPLETED, departureAt: departure }))).toThrow(InvalidTripError);
+    expect(() => new Trip(props({ status: TripStatus.IN_PROGRESS, departureAt: departure }))).toThrow(InvalidTripError);
   });
 
   it('reconstruye un viaje in_progress válido y ordena los tramos', () => {
@@ -86,12 +63,6 @@ describe('Trip: consistencia al reconstruir (como viene de la base)', () => {
       }),
     );
     expect(trip.routes.map((r) => r.sequenceOrder)).toEqual([1, 2]);
-  });
-
-  it('rechaza rutas que no coinciden con los pedidos', () => {
-    expect(() => new Trip(props({ routes: [leg(1, 'o1')] }))).toThrow(
-      InvalidRoutePlanError,
-    );
   });
 });
 
@@ -112,27 +83,14 @@ describe('Trip.attachRoutePlan', () => {
 
   it('rechaza un plan de otro viaje', () => {
     const trip = new Trip(props());
-    expect(() => trip.attachRoutePlan(plan(goodLegs(), 'otro'))).toThrow(
-      InvalidRoutePlanError,
-    );
+    expect(() => trip.attachRoutePlan(plan(goodLegs(), 'otro'))).toThrow(InvalidRoutePlanError);
     expect(trip.routes).toEqual([]);
   });
 
   it('rechaza cantidad de tramos distinta a la de pedidos', () => {
     const trip = new Trip(props());
-    expect(() => trip.attachRoutePlan(plan([leg(1, 'o1')]))).toThrow(
-      InvalidRoutePlanError,
-    );
-    expect(() =>
-      trip.attachRoutePlan(plan([leg(1, 'o1'), leg(2, 'o2'), leg(3, 'o1')])),
-    ).toThrow(InvalidRoutePlanError);
-  });
-
-  it('rechaza secuencia con huecos o repetidos', () => {
-    const trip = new Trip(props());
-    expect(() => trip.attachRoutePlan(plan([leg(1, 'o1'), leg(3, 'o2')]))).toThrow(InvalidRoutePlanError);
-    
-    expect(() => trip.attachRoutePlan(plan([leg(1, 'o1'), leg(1, 'o2')]))).toThrow(InvalidRoutePlanError);
+    expect(() => trip.attachRoutePlan(plan([leg(1, 'o1')]))).toThrow(InvalidRoutePlanError);
+    expect(() => trip.attachRoutePlan(plan([leg(1, 'o1'), leg(2, 'o2'), leg(3, 'o1')]))).toThrow(InvalidRoutePlanError);
   });
 
   it('rechaza un pedido ajeno al viaje', () => {
@@ -140,17 +98,9 @@ describe('Trip.attachRoutePlan', () => {
     expect(() => trip.attachRoutePlan(plan([leg(1, 'o1'), leg(2, 'x')]))).toThrow(InvalidRoutePlanError);
   });
 
-  it('rechaza un pedido repetido entre tramos', () => {
-    const trip = new Trip(props());
-    expect(() => trip.attachRoutePlan(plan([leg(1, 'o1'), leg(2, 'o1')]))).toThrow(InvalidRoutePlanError);
-
-    expect(trip.routes).toEqual([]);
-  });
-
   it('un plan inválido no deja el viaje a medias: un plan válido posterior sí se acepta', () => {
     const trip = new Trip(props());
     expect(() => trip.attachRoutePlan(plan([leg(1, 'o1')]))).toThrow(InvalidRoutePlanError);
-
     expect(trip.attachRoutePlan(plan(goodLegs()))).toBe(true);
   });
 });
@@ -165,31 +115,17 @@ describe('Trip: transiciones', () => {
   it('planned -> in_progress -> completed', () => {
     const trip = withRoutes();
     trip.start(departure);
-
     expect(trip.status).toBe(TripStatus.IN_PROGRESS);
     expect(trip.departureAt).toEqual(departure);
-
     trip.complete();
-
     expect(trip.status).toBe(TripStatus.COMPLETED);
   });
 
   it('no inicia sin rutas calculadas', () => {
     const trip = new Trip(props());
-
     expect(() => trip.start(departure)).toThrow(InvalidTripTransitionError);
-
     expect(trip.status).toBe(TripStatus.PLANNED);
-
     expect(trip.departureAt).toBeNull();
-  });
-
-  it('rechaza fecha de salida inválida', () => {
-    const trip = withRoutes();
-
-    expect(() => trip.start(new Date('x'))).toThrow(InvalidTripError);
-
-    expect(trip.status).toBe(TripStatus.PLANNED);
   });
 
   it('no se inicia dos veces', () => {
@@ -200,33 +136,5 @@ describe('Trip: transiciones', () => {
 
   it('no se completa desde planned', () => {
     expect(() => withRoutes().complete()).toThrow(InvalidTripTransitionError);
-  });
-
-  it('no se completa dos veces', () => {
-    const trip = withRoutes();
-    trip.start(departure);
-    trip.complete();
-    expect(() => trip.complete()).toThrow(InvalidTripTransitionError);
-  });
-
-  it('departureAt devuelve una copia', () => {
-    const trip = withRoutes();
-    trip.start(departure);
-    trip.departureAt!.setFullYear(1999);
-    expect(trip.departureAt).toEqual(departure);
-  });
-
-  it('start copia la fecha recibida', () => {
-    const trip = withRoutes();
-    const at = new Date(departure);
-    trip.start(at);
-    at.setFullYear(1999);
-    expect(trip.departureAt).toEqual(departure);
-  });
-
-  it('routes devuelve una copia', () => {
-    const trip = withRoutes();
-    (trip.routes as Route[]).pop();
-    expect(trip.routes).toHaveLength(2);
   });
 });

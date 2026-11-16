@@ -23,36 +23,40 @@ export class Route {
 
   constructor(props: RouteProps) {
     if (!Number.isInteger(props.sequenceOrder) || props.sequenceOrder < 1) {
-      throw new InvalidRouteError(`sequenceOrder inválido: ${props.sequenceOrder}`);
+      throw new InvalidRouteError(
+        `sequenceOrder inválido: ${props.sequenceOrder}`,
+      );
     }
-
     if (props.toOrderId.trim() === '') {
       throw new InvalidRouteError('El tramo necesita el pedido de destino');
     }
-
     if (props.geometry.length < 2) {
       throw new InvalidRouteError('La geometría necesita al menos 2 puntos');
     }
-
     if (!props.geometry.every(isValidPoint)) {
       throw new InvalidRouteError('La geometría tiene coordenadas inválidas');
     }
-
     if (!Number.isFinite(props.distanceKm) || props.distanceKm < 0) {
       throw new InvalidRouteError(`Distancia inválida: ${props.distanceKm}`);
     }
-
-    if (!Number.isInteger(props.estimatedTimeMin) || props.estimatedTimeMin < 0) {
-      throw new InvalidRouteError(`Tiempo estimado inválido: ${props.estimatedTimeMin}`);
+    if (
+      !Number.isInteger(props.estimatedTimeMin) ||
+      props.estimatedTimeMin < 0
+    ) {
+      throw new InvalidRouteError(
+        `Tiempo estimado inválido: ${props.estimatedTimeMin}`,
+      );
     }
-
     if (props.algorithmUsed.trim() === '') {
       throw new InvalidRouteError('Falta indicar el algoritmo usado');
     }
 
     this.sequenceOrder = props.sequenceOrder;
     this.toOrderId = props.toOrderId;
-    this.geometry = props.geometry.map((point) => ({ latitude: point.latitude, longitude: point.longitude }));
+    this.geometry = props.geometry.map((point) => ({
+      latitude: point.latitude,
+      longitude: point.longitude,
+    }));
     this.distanceKm = props.distanceKm;
     this.estimatedTimeMin = props.estimatedTimeMin;
     this.algorithmUsed = props.algorithmUsed;

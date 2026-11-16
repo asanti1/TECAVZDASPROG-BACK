@@ -7,4 +7,6 @@ __pycache__/
 *.log
 .DS_Store
 *.tsbuildinfo
-docker-compose.example.yml
+docker-compose.yml
+.demo/
+routing-service/cache/

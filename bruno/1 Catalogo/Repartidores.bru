@@ -1,0 +1,19 @@
+meta {
+  name: Repartidores
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/users?role=DELIVERY_PERSON
+  body: none
+  auth: bearer
+}
+
+assert {
+  res.status: eq 200
+}
+
+auth:bearer {
+  token: {{token}}
+}

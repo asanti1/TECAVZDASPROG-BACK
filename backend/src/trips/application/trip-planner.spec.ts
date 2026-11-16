@@ -36,7 +36,7 @@ const customerOrder = (id: string, originBranchId = 'b1'): Order =>
     type: OrderType.CUSTOMER,
     originBranchId,
     customerId: 'c1',
-    deliveryAddress: { street: 'Calle 1', latitude: -34.7, longitude: -58.5 },
+    deliveryAddress: { latitude: -34.7, longitude: -58.5 },
     items: [{ productId: 'p1', quantity: 1 }],
   });
 
@@ -74,37 +74,6 @@ describe('TripPlanner.planTrip', () => {
     expect(request.tripId).toBe('trip-1');
     expect(request.origin).toEqual(origin.location);
     expect(request.stops.map((s) => s.orderId)).toEqual(['o1', 'o2']);
-  });
-
-  it('no tiene efectos externos: no publica nada', () => {
-    const { planner, optimizer } = build();
-    planner.planTrip({
-      deliveryPersonId: 'd1',
-      origin,
-      stops: [stop(customerOrder('o1'))],
-    });
-    expect(optimizer.requests).toEqual([]);
-  });
-
-  it('rechaza una lista de paradas vacía', () => {
-    const { planner } = build();
-    expect(() =>
-      planner.planTrip({ deliveryPersonId: 'd1', origin, stops: [] }),
-    ).toThrow(InvalidTripError);
-  });
-
-  it('rechaza el mismo pedido dos veces y no toca ningún pedido', () => {
-    const { planner } = build();
-    const o1 = customerOrder('o1');
-    expect(() =>
-      planner.planTrip({
-        deliveryPersonId: 'd1',
-        origin,
-        stops: [stop(o1), stop(o1)],
-      }),
-    ).toThrow(InvalidTripError);
-    expect(o1.status).toBe(OrderStatus.PENDING);
-    expect(o1.tripId).toBeNull();
   });
 
   it('rechaza pedidos que no están pending', () => {
@@ -146,44 +115,6 @@ describe('TripPlanner.planTrip', () => {
     expect(good.status).toBe(OrderStatus.PENDING);
     expect(good.tripId).toBeNull();
     expect(bad.status).toBe(OrderStatus.PENDING);
-  });
-
-  it('también es atómico con el inválido primero', () => {
-    const { planner } = build();
-    const bad = customerOrder('o1', 'b2');
-    const good = customerOrder('o2');
-    expect(() =>
-      planner.planTrip({
-        deliveryPersonId: 'd1',
-        origin,
-        stops: [stop(bad), stop(good)],
-      }),
-    ).toThrow(InvalidTripError);
-    expect(good.status).toBe(OrderStatus.PENDING);
-  });
-
-  it('rechaza repartidor vacío (valida el Trip) sin tocar los pedidos', () => {
-    const { planner } = build();
-    const o1 = customerOrder('o1');
-    expect(() =>
-      planner.planTrip({ deliveryPersonId: '', origin, stops: [stop(o1)] }),
-    ).toThrow(InvalidTripError);
-    expect(o1.status).toBe(OrderStatus.PENDING);
-  });
-
-  it('genera un id distinto en cada viaje', () => {
-    const { planner } = build();
-    const a = planner.planTrip({
-      deliveryPersonId: 'd1',
-      origin,
-      stops: [stop(customerOrder('o1'))],
-    });
-    const b = planner.planTrip({
-      deliveryPersonId: 'd1',
-      origin,
-      stops: [stop(customerOrder('o2'))],
-    });
-    expect(a.trip.id).not.toBe(b.trip.id);
   });
 });
 

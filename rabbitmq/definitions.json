@@ -1,0 +1,142 @@
+{
+  "users": [
+    {
+      "name": "logistics",
+      "password_hash": "emAgIvXwg7p+f0VKBUgSsDDuRP5QcTgwtXhNFNFU6/PS/0wm",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": [
+        "administrator"
+      ]
+    },
+    {
+      "name": "backend",
+      "password_hash": "uDX4IyVudHBMeaSBvEaiGXme68BHYpHGf5knqfxOmgopUHgF",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": []
+    },
+    {
+      "name": "router",
+      "password_hash": "NVsxwLnNvft7A5KoKfrrTIsahKf1/+x7CTpexrOtG+7YdWOf",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": []
+    }
+  ],
+  "vhosts": [
+    {
+      "name": "/"
+    }
+  ],
+  "permissions": [
+    {
+      "user": "logistics",
+      "vhost": "/",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    },
+    {
+      "user": "backend",
+      "vhost": "/",
+      "configure": "^$",
+      "write": "^logistics\\.routing$",
+      "read": "^route\\.results$"
+    },
+    {
+      "user": "router",
+      "vhost": "/",
+      "configure": "^$",
+      "write": "^logistics\\.routing$",
+      "read": "^route\\.requests$"
+    }
+  ],
+  "exchanges": [
+    {
+      "name": "logistics.routing",
+      "vhost": "/",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "logistics.dead",
+      "vhost": "/",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    }
+  ],
+  "queues": [
+    {
+      "name": "route.requests",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "logistics.dead",
+        "x-dead-letter-routing-key": "route.requests.dead"
+      }
+    },
+    {
+      "name": "route.results",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "logistics.dead",
+        "x-dead-letter-routing-key": "route.results.dead"
+      }
+    },
+    {
+      "name": "route.requests.dead",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "route.results.dead",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    }
+  ],
+  "bindings": [
+    {
+      "source": "logistics.routing",
+      "vhost": "/",
+      "destination": "route.requests",
+      "destination_type": "queue",
+      "routing_key": "route.requests",
+      "arguments": {}
+    },
+    {
+      "source": "logistics.routing",
+      "vhost": "/",
+      "destination": "route.results",
+      "destination_type": "queue",
+      "routing_key": "route.results",
+      "arguments": {}
+    },
+    {
+      "source": "logistics.dead",
+      "vhost": "/",
+      "destination": "route.requests.dead",
+      "destination_type": "queue",
+      "routing_key": "route.requests.dead",
+      "arguments": {}
+    },
+    {
+      "source": "logistics.dead",
+      "vhost": "/",
+      "destination": "route.results.dead",
+      "destination_type": "queue",
+      "routing_key": "route.results.dead",
+      "arguments": {}
+    }
+  ]
+}

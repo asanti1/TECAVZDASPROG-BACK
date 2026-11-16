@@ -11,6 +11,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./db/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+      - ./db/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
@@ -20,20 +21,60 @@ services:
   rabbitmq:
     image: rabbitmq:3-management-alpine
     container_name: logistics-rabbitmq
-    environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-logistics}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-logistics_dev}
     ports:
       - "${RABBITMQ_PORT:-5672}:5672"
       - "${RABBITMQ_MANAGEMENT_PORT:-15672}:15672"
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
+      - ./rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
+      - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/conf.d/20-definitions.conf:ro
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
       interval: 10s
       timeout: 10s
       retries: 10
 
+  backend:
+    build: ./backend
+    container_name: logistics-backend
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_DB: ${POSTGRES_DB:-logistics}
+      POSTGRES_USER: ${POSTGRES_USER:-logistics}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-logistics_dev}
+      RABBITMQ_HOST: rabbitmq
+      JWT_SECRET: ${JWT_SECRET:-clave-solo-para-desarrollo}
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  routing:
+    build: ./routing-service
+    container_name: logistics-routing
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      ROUTING_ALGORITHM: ${ROUTING_ALGORITHM:-dijkstra}
+      OVERPASS_URL: ${OVERPASS_URL:-}
+      MAP_BBOX: ${MAP_BBOX:-}
+    volumes:
+      - routing_cache:/app/cache
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  frontend:
+    image: nginx:alpine
+    container_name: logistics-frontend
+    ports:
+      - "5173:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+
 volumes:
   postgres_data:
   rabbitmq_data:
+  routing_cache:

@@ -1,0 +1,28 @@
+meta {
+  name: 4 Ver ruta (esperar a que este lista)
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/trips/{{tripId}}/route
+  body: none
+  auth: bearer
+}
+
+assert {
+  res.status: eq 200
+  res.body.routesReady: eq true
+}
+
+script:pre-request {
+await bru.sleep(3000);
+}
+
+docs {
+  Si routesReady es false, el servicio todavia esta calculando: volver a ejecutar esta request.
+}
+
+auth:bearer {
+  token: {{token}}
+}

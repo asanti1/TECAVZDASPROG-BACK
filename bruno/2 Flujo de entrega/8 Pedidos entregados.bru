@@ -1,0 +1,19 @@
+meta {
+  name: 8 Pedidos entregados
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{baseUrl}}/orders?status=delivered
+  body: none
+  auth: bearer
+}
+
+assert {
+  res.status: eq 200
+}
+
+auth:bearer {
+  token: {{token}}
+}

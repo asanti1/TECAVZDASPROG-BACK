@@ -1,0 +1,20 @@
+meta {
+  name: 5 Salir (start)
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/trips/{{tripId}}/start
+  body: none
+  auth: bearer
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq in_progress
+}
+
+auth:bearer {
+  token: {{token}}
+}

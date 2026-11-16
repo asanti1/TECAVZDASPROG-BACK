@@ -7,9 +7,7 @@ export interface OrderItem {
   quantity: number;
 }
 
-export interface DeliveryAddress extends Coordinates {
-  street: string;
-}
+export type DeliveryAddress = Coordinates;
 
 export interface OrderProps {
   id: string;
@@ -80,9 +78,7 @@ export class Order {
 
   private requireStatus(expected: OrderStatus, target: OrderStatus): void {
     if (this._status !== expected) {
-      throw new InvalidOrderTransitionError(
-        `Order ${this.id}: no se puede pasar de '${this._status}' a '${target}' (requiere '${expected}')`,
-      );
+      throw new InvalidOrderTransitionError(`Order ${this.id}: no se puede pasar de '${this._status}' a '${target}' (requiere '${expected}')`);
     }
   }
 
@@ -92,9 +88,7 @@ export class Order {
     }
     for (const item of this.items) {
       if (!Number.isInteger(item.quantity) || item.quantity <= 0) {
-        throw new InvalidOrderError(
-          `Cantidad inválida para el producto ${item.productId}: ${item.quantity}`,
-        );
+        throw new InvalidOrderError(`Cantidad inválida para el producto ${item.productId}: ${item.quantity}`);
       }
     }
     const ids = new Set(this.items.map((item) => item.productId));
@@ -106,31 +100,21 @@ export class Order {
   private validateTarget(): void {
     if (this.type === OrderType.CUSTOMER) {
       if (!this.customerId || !this.deliveryAddress) {
-        throw new InvalidOrderError(
-          'Un pedido CUSTOMER requiere cliente y dirección de entrega',
-        );
+        throw new InvalidOrderError('Un pedido CUSTOMER requiere cliente y dirección de entrega');
       }
       if (this.destinationBranchId) {
-        throw new InvalidOrderError(
-          'Un pedido CUSTOMER no puede tener sucursal destino',
-        );
+        throw new InvalidOrderError('Un pedido CUSTOMER no puede tener sucursal destino');
       }
       return;
     }
     if (!this.destinationBranchId) {
-      throw new InvalidOrderError(
-        'Un pedido INTER_BRANCH requiere sucursal destino',
-      );
+      throw new InvalidOrderError('Un pedido INTER_BRANCH requiere sucursal destino');
     }
     if (this.destinationBranchId === this.originBranchId) {
-      throw new InvalidOrderError(
-        'La sucursal destino no puede ser la misma que la de origen',
-      );
+      throw new InvalidOrderError('La sucursal destino no puede ser la misma que la de origen');
     }
     if (this.customerId) {
-      throw new InvalidOrderError(
-        'Un pedido INTER_BRANCH no puede tener cliente',
-      );
+      throw new InvalidOrderError('Un pedido INTER_BRANCH no puede tener cliente');
     }
   }
 
@@ -140,9 +124,7 @@ export class Order {
       throw new InvalidOrderError('Un pedido pending no puede tener viaje');
     }
     if (!isPending && this._tripId === null) {
-      throw new InvalidOrderError(
-        `Un pedido '${this._status}' requiere tener viaje`,
-      );
+      throw new InvalidOrderError(`Un pedido '${this._status}' requiere tener viaje`);
     }
   }
 }

@@ -6,6 +6,7 @@ export interface PlanStop {
   location: Coordinates;
 }
 
+
 export interface RoutePlanRequest {
   tripId: string;
   origin: Coordinates;

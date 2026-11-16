@@ -27,6 +27,7 @@ export interface PlannedTrip {
   request: RoutePlanRequest;
 }
 
+
 @Injectable()
 export class TripPlanner {
   constructor(
@@ -49,14 +50,22 @@ export class TripPlanner {
 
     return {
       trip,
-      request: {
-        tripId: trip.id,
-        origin: input.origin.location,
-        stops: input.stops.map(({ order, location }) => ({
-          orderId: order.id,
-          location,
-        })),
-      },
+      request: this.buildRequest(trip.id, input.origin, input.stops),
+    };
+  }
+
+  buildRequest(
+    tripId: string,
+    origin: Branch,
+    stops: ReadonlyArray<PlanTripStop>,
+  ): RoutePlanRequest {
+    return {
+      tripId,
+      origin: origin.location,
+      stops: stops.map(({ order, location }) => ({
+        orderId: order.id,
+        location,
+      })),
     };
   }
 
@@ -65,20 +74,24 @@ export class TripPlanner {
   }
 
   private assertPlannable({ origin, stops }: PlanTripInput): void {
-    if (stops.length === 0) throw new InvalidTripError('Un viaje necesita al menos un pedido');
-
+    if (stops.length === 0) {
+      throw new InvalidTripError('Un viaje necesita al menos un pedido');
+    }
     const seen = new Set<string>();
-
     for (const { order } of stops) {
-      if (seen.has(order.id)) throw new InvalidTripError(`El pedido ${order.id} está repetido`);
-      seen.add(order.id);
-
-      if (order.status !== OrderStatus.PENDING) {
-        throw new InvalidTripError(`El pedido ${order.id} está '${order.status}': solo se agrupan pedidos pending`);
+      if (seen.has(order.id)) {
+        throw new InvalidTripError(`El pedido ${order.id} está repetido`);
       }
-
+      seen.add(order.id);
+      if (order.status !== OrderStatus.PENDING) {
+        throw new InvalidTripError(
+          `El pedido ${order.id} está '${order.status}': solo se agrupan pedidos pending`,
+        );
+      }
       if (order.originBranchId !== origin.id) {
-        throw new InvalidTripError(`El pedido ${order.id} sale de otra sucursal (${order.originBranchId}, no ${origin.id})`);
+        throw new InvalidTripError(
+          `El pedido ${order.id} sale de otra sucursal (${order.originBranchId}, no ${origin.id})`,
+        );
       }
     }
   }

@@ -1,0 +1,28 @@
+meta {
+  name: Sin stock suficiente (409)
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/orders
+  body: json
+  auth: bearer
+}
+
+body:json {
+  {
+    "type": "CUSTOMER",
+    "customerId": "{{customerId}}",
+    "deliveryAddress": { "latitude": -38.714, "longitude": -62.265 },
+    "items": [{ "productId": "{{productId}}", "quantity": 999999 }]
+  }
+}
+
+assert {
+  res.status: eq 409
+}
+
+auth:bearer {
+  token: {{token}}
+}

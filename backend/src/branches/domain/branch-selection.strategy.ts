@@ -23,5 +23,4 @@ export interface IBranchSelectionStrategy {
   ): Branch;
 }
 
-// inyeccion, en ts no ay interfaces en runtime
 export const BRANCH_SELECTION_STRATEGY = Symbol('IBranchSelectionStrategy');

@@ -27,21 +27,31 @@ CREATE TABLE vehicles (
 );
 
 CREATE TABLE products (
-    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name  TEXT NOT NULL,
+    sku   TEXT NOT NULL UNIQUE
+);
+
+CREATE TABLE branch_stock (
     branch_id   UUID    NOT NULL REFERENCES branches (id),
-    name        TEXT    NOT NULL,
-    sku         TEXT    NOT NULL,
+    product_id  UUID    NOT NULL REFERENCES products (id),
     stock_qty   INTEGER NOT NULL DEFAULT 0 CHECK (stock_qty >= 0),
-    UNIQUE (branch_id, sku)
+    PRIMARY KEY (branch_id, product_id)
 );
 
 CREATE TABLE trips (
     id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     delivery_person_id  UUID        NOT NULL REFERENCES users (id),
+    origin_branch_id    UUID        NOT NULL REFERENCES branches (id),
     status              TEXT        NOT NULL DEFAULT 'planned'
                                     CHECK (status IN ('planned', 'in_progress', 'completed')),
-    departure_at        TIMESTAMPTZ
+    departure_at        TIMESTAMPTZ,
+    created_at          TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+CREATE UNIQUE INDEX trips_one_open_per_delivery_person
+    ON trips (delivery_person_id)
+    WHERE status IN ('planned', 'in_progress');
 
 CREATE TABLE orders (
     id                    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -95,4 +105,4 @@ CREATE TABLE routes (
 CREATE INDEX idx_orders_status_origin ON orders (status, origin_branch_id);
 CREATE INDEX idx_orders_trip          ON orders (trip_id);
 CREATE INDEX idx_trips_delivery       ON trips  (delivery_person_id);
-CREATE INDEX idx_products_branch      ON products (branch_id);
+CREATE INDEX idx_branch_stock_product ON branch_stock (product_id);
